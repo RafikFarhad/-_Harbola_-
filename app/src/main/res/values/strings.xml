@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Harbola</string>
+    <string name="welcome">!_Harbola_!</string>
+    <string name="welcome2">Share your moments instatnly.....\n\nWelcome to </string>
+    <string name="host">Create</string>
+    <string name="guest">Join</string>
+    <string name="detaills">A Project 200 Creation</string>
+    <string name="gallery">Go To Gallery</string>
+
+</resources>
