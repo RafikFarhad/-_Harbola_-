@@ -128,7 +128,7 @@ public class Create_page extends AppCompatActivity {
         //set the gallery adapter
         picGallery.setAdapter(imgAdapt);
 
-        Toast.makeText(getApplicationContext(), "DEFAULT;", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "DEFAULT;", Toast.LENGTH_SHORT).show();
         currentPic = 1;
 
         listOfAllImages = getAllShownImagesPath(this);
@@ -140,9 +140,9 @@ public class Create_page extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 //set the larger image view to display the chosen bitmap calling method of adapter class
                 //picView.setImageBitmap(BitmapFactory.decodeFile(new File(listOfAllImages.get(position)).getAbsolutePath()));
+                System.out.println("********** = " + listOfAllImages.get(position));
                 Picasso.with(getBaseContext()).load(new File(listOfAllImages.get(position))).into(picView);
                 Toast.makeText(getApplicationContext(), "Send This Image Now", Toast.LENGTH_SHORT).show();
-                //picView.setImageBitmap(imgAdapt.getPic(position));
             }
         });
 
@@ -152,90 +152,11 @@ public class Create_page extends AppCompatActivity {
 
 
         try {
-//            for (int i = total; i < total; i++) {
-//
-//                currentPic = i;
-//                System.out.println(i + "------------>" + listOfAllImages.get(i));
-//                Uri pickedUri = Uri.parse(new File(listOfAllImages.get(i)).toString());
-//                //Uri pickedUri = data.getData();  ///content://media/external/images/media/15761
-//
-////                System.out.println("RESULT_OK = " + RESULT_OK);
-////                System.out.println("PICKER = " + PICKER);
-////                System.out.println("Uri = " + data.getData().toString());
-//
-//                //declare the bitmap
-//                Bitmap pic = null;
-//                //declare the path string
-//                String imgPath = listOfAllImages.get(i);
-//                //retrieve the string using media data
-//                String[] medData = {MediaStore.Images.Media.DATA};
-//                //query the data
-////            Cursor picCursor = managedQuery(pickedUri, medData, null, null, null);
-////            if(picCursor!=null)
-////            {
-////                //get the path string
-////                int index = picCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-////                picCursor.moveToFirst();
-////                imgPath = picCursor.getString(index);
-////            }
-////            else {
-////                //Toast.makeText(getApplicationContext(), "imgPath = pickedUri.getPath();", Toast.LENGTH_SHORT).show();
-////                imgPath = pickedUri.getPath();
-////            }
-//
-//                /// *** fixing
-//                //if we have a new URI attempt to decode the image bitmap
-//                if (pickedUri != null) {
-//
-//                    //set the width and height we want to use as maximum display
-//                    int targetWidth = 2;
-//                    int targetHeight = 2;
-//                    //create bitmap options to calculate and use sample size
-//                    BitmapFactory.Options bmpOptions = new BitmapFactory.Options();
-//                    //first decode image dimensions only - not the image bitmap itself
-//                    bmpOptions.inJustDecodeBounds = true;
-//                    BitmapFactory.decodeFile(imgPath, bmpOptions);
-//
-//                    //image width and height before sampling
-//                    int currHeight = bmpOptions.outHeight;
-//                    int currWidth = bmpOptions.outWidth;
-//                    //variable to store new sample size
-//                    int sampleSize = 1;
-//                    //calculate the sample size if the existing size is larger than target size
-//                    if (currHeight > targetHeight || currWidth > targetWidth) {
-//                        //use either width or height
-//                        if (currWidth > currHeight)
-//                            sampleSize = Math.round((float) currHeight / (float) targetHeight);
-//                        else
-//                            sampleSize = Math.round((float) currWidth / (float) targetWidth);
-//                    }
-//                    //use the new sample size
-//                    bmpOptions.inSampleSize = sampleSize;
-//                    //now decode the bitmap using sample options
-//                    bmpOptions.inJustDecodeBounds = false;
-//                    //get the file as a bitmap
-//                    pic = BitmapFactory.decodeFile(imgPath);
-//                    //Picasso.with(context).load(imgPath).into(imgAdapt.);
-//                    //pass bitmap to ImageAdapter to add to array
-//                    imgAdapt.addPic(pic);
-//                    //redraw the gallery thumbnails to reflect the new addition
-//                    //picGallery.setAdapter(imgAdapt);
-//
-//
-//                    /// IMAGE VIEW EKHAN THEKE KAJ KORCHE
-//
-//                    //display the newly selected image at larger size
-//                    //picView.setImageBitmap(pic);
-//                    //scale options
-//                    //picView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//                }
-//
-//            }
             picGallery.setAdapter(imgAdapt);
         } catch (OutOfMemoryError e) {
             Toast.makeText(getApplicationContext(), "OUT OF MEMORY!", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Error in readin external storage!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Error in reading external storage!", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }
@@ -257,111 +178,9 @@ public class Create_page extends AppCompatActivity {
         while (cursor.moveToNext()) {
             absolutePathOfImage = cursor.getString(column_index_data);
             listOfAllImages.add(absolutePathOfImage);
+            //System.out.println(absolutePathOfImage);
         }
         return listOfAllImages;
-    }
-
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//
-//        if (resultCode == RESULT_OK) {
-//            //check if we are returning from picture selection
-//            if (requestCode == PICKER) {
-//                //import the image
-//                //the returned picture URI
-//                Uri pickedUri = data.getData();  ///content://media/external/images/media/15761
-//
-////                System.out.println("RESULT_OK = " + RESULT_OK);
-////                System.out.println("PICKER = " + PICKER);
-////                System.out.println("Uri = " + data.getData().toString());
-//
-//                //declare the bitmap
-//                Bitmap pic = null;
-//                //declare the path string
-//                String imgPath = "";
-//                //retrieve the string using media data
-//                String[] medData = { MediaStore.Images.Media.DATA };
-//                //query the data
-//                Cursor picCursor = managedQuery(pickedUri, medData, null, null, null);
-//                if(picCursor!=null)
-//                {
-//                    //get the path string
-//                    int index = picCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-//                    picCursor.moveToFirst();
-//                    imgPath = picCursor.getString(index);
-//                }
-//                else {
-//                    Toast.makeText(getApplicationContext(), "imgPath = pickedUri.getPath();", Toast.LENGTH_SHORT).show();
-//                    imgPath = pickedUri.getPath();
-//                }
-//
-//                /// *** fixing
-//                //if we have a new URI attempt to decode the image bitmap
-//                if(pickedUri!=null) {
-//
-//                    //set the width and height we want to use as maximum display
-//                    int targetWidth = 600;
-//                    int targetHeight = 400;
-//                    //create bitmap options to calculate and use sample size
-//                    BitmapFactory.Options bmpOptions = new BitmapFactory.Options();
-//                    //first decode image dimensions only - not the image bitmap itself
-//                    bmpOptions.inJustDecodeBounds = true;
-//                    BitmapFactory.decodeFile(imgPath, bmpOptions);
-//
-//                    //image width and height before sampling
-//                    int currHeight = bmpOptions.outHeight;
-//                    int currWidth = bmpOptions.outWidth;
-//                    //variable to store new sample size
-//                    int sampleSize = 1;
-//                    //calculate the sample size if the existing size is larger than target size
-//                    if (currHeight>targetHeight || currWidth>targetWidth)
-//                    {
-//                        //use either width or height
-//                        if (currWidth>currHeight)
-//                            sampleSize = Math.round((float)currHeight/(float)targetHeight);
-//                        else
-//                            sampleSize = Math.round((float)currWidth/(float)targetWidth);
-//                    }
-//                    //use the new sample size
-//                    bmpOptions.inSampleSize = sampleSize;
-//                    //now decode the bitmap using sample options
-//                    bmpOptions.inJustDecodeBounds = false;
-//                    //get the file as a bitmap
-//                    pic = BitmapFactory.decodeFile(imgPath, bmpOptions);
-//                    //pass bitmap to ImageAdapter to add to array
-//                    imgAdapt.addPic(pic);
-//                    //redraw the gallery thumbnails to reflect the new addition
-//                    picGallery.setAdapter(imgAdapt);
-//
-//
-//                    /// IMAGE VIEW EKHAN THEKE KAJ KORCHE
-//
-//                    //display the newly selected image at larger size
-//                    picView.setImageBitmap(pic);
-//                    //scale options
-//                    picView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//                }
-//
-//            }
-//        }
-//        //superclass method
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
-
-
-    public void refresh(String ab){
-        //TextView pq = (TextView) findViewById(R.id.test);
-        //pq.setText(ab);
-    }
-
-
-
-    public void go_to_gallery(View view){
-
-        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivity(intent);
-        //startActivityForResult(intent, GALLERY_INTENT);
-
     }
 
     public class PicAdapter extends BaseAdapter {

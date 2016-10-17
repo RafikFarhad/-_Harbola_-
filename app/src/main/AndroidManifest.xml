@@ -20,6 +20,7 @@
         <activity android:name=".Create_page" />
         <activity android:name=".Join_page"></activity>
         <activity android:name=".FileBrowser"></activity>
+        <service android:name=".ServerService"></service>
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!--<uses-permission android:name="android.permission." />-->

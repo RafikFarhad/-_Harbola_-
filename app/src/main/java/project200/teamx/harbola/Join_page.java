@@ -5,21 +5,30 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Environment;
+import android.os.ResultReceiver;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class Join_page extends AppCompatActivity {
@@ -34,6 +43,14 @@ public class Join_page extends AppCompatActivity {
     BroadcastReceiver mReceiver;
     IntentFilter mIntentFilter;
     WifiP2pDevice targetDevice;
+    private WifiP2pManager wifiManager;
+    private WifiP2pManager.Channel wifichannel;
+    private BroadcastReceiver wifiServerReceiver;
+    private IntentFilter wifiServerReceiverIntentFilter;
+    private String path;
+    private File downloadTarget;
+    private Intent serverServiceIntent;
+    private boolean serverThreadActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +82,105 @@ public class Join_page extends AppCompatActivity {
             }
         });
         Toast.makeText(getApplicationContext(), "Searching for !_Harbola_! group", Toast.LENGTH_SHORT).show();
+        TextView serverServiceStatus = (TextView) findViewById(R.id.server_status_text);
+        serverServiceStatus.setText("server_stopped");
+
+        path = "/Harbola/";
+        downloadTarget = new File(path);
+
+        serverServiceIntent = null;
+        serverThreadActive = false;
+
+        setServerFileTransferStatus("No File being transfered");
+
+        //registerReceiver(wifiServerReceiver, wifiServerReceiverIntentFilter);
+        startServer();
     }
+
+    public void startServer() {
+
+        //If server is already listening on port or transfering data, do not attempt to start server service
+        if(!serverThreadActive)
+        {
+            Toast.makeText(getApplicationContext(), "SERVER CREATED with port: " + port, Toast.LENGTH_SHORT).show();
+            System.out.println("SERVER CREATED");
+            //Create new thread, open socket, wait for connection, and transfer file
+            serverServiceIntent = new Intent(this, ServerService.class);
+            serverServiceIntent.putExtra("saveLocation", downloadTarget);
+            serverServiceIntent.putExtra("port", new Integer(port));
+            serverServiceIntent.putExtra("serverResult", new ResultReceiver(null) {
+                @Override
+                protected void onReceiveResult(int resultCode, final Bundle resultData) {
+                    if(resultCode == port )
+                    {
+                        if (resultData == null) {
+                            //Server service has shut down. Download may or may not have completed properly.
+                            serverThreadActive = false;
+                            final TextView server_status_text = (TextView) findViewById(R.id.server_status_text);
+                            server_status_text.post(new Runnable() {
+                                public void run() {
+                                    server_status_text.setText("server_stopped");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            final TextView server_file_status_text = (TextView) findViewById(R.id.server_file_transfer_status);
+                            server_file_status_text.post(new Runnable() {
+                                public void run() {
+                                    String msg = (String)resultData.get("message");
+                                    if(msg!=null) server_file_status_text.setText(msg);
+                                    String path_for_shocase = (String) resultData.get("path_for_showcase");
+                                    ImageView SC = (ImageView) findViewById(R.id.ShowCase);
+                                    Bitmap myBitmap = BitmapFactory.decodeFile(path_for_shocase);
+                                    if(myBitmap!=null) SC.setImageBitmap(myBitmap);
+                                    else SC.setImageResource(R.drawable.ic_launcher);
+                                }
+                            });
+                        }
+                    }
+
+                }
+            });
+
+            serverThreadActive = true;
+            /// here starts ServerService.java
+            startService(serverServiceIntent);
+            System.out.println("startService(serverServiceIntent); + " + serverServiceIntent.getExtras().get("port"));
+
+            //Set status to running
+            TextView serverServiceStatus = (TextView) findViewById(R.id.server_status_text);
+            serverServiceStatus.setText("server_running");
+
+        }
+        else
+        {
+            //Set status to already running
+            TextView serverServiceStatus = (TextView) findViewById(R.id.server_status_text);
+            serverServiceStatus.setText("The server is already running");
+
+        }
+    }
+
+    public void stopServer(View view) {
+
+
+        //stop download thread
+        if(serverServiceIntent != null)
+        {
+            stopService(serverServiceIntent);
+
+        }
+
+    }
+
+
+//    public void startClientActivity(View view) {
+//
+//        stopServer(null);
+//        Intent clientStartIntent = new Intent(this, ClientActivity.class);
+//        startActivity(clientStartIntent);
+//    }
 
     public void searchForPeers() {
 
@@ -190,17 +305,57 @@ public class Join_page extends AppCompatActivity {
         }
     }
 
+    public void setServerWifiStatus(String message)
+    {
+//        server_wifi_status_text.setText(message);
+    }
+
+    public void setServerStatus(String message)
+    {
+        TextView server_status_text = (TextView) findViewById(R.id.server_status_text);
+        server_status_text.setText(message);
+    }
+
+
+    public void setServerFileTransferStatus(String message)
+    {
+        TextView server_status_text = (TextView) findViewById(R.id.server_file_transfer_status);
+        server_status_text.setText(message);
+    }
 
     /* register the broadcast receiver with the intent values to be matched */
     @Override
     protected void onResume() {
+        setServerFileTransferStatus("CHECK");
+//        signalActivity("Ready to receive Image from Pair");
+        System.out.println("On resume");
         super.onResume();
-        registerReceiver(mReceiver, mIntentFilter);
     }
-    /* unregister the broadcast receiver */
+
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
+        System.out.println("On Pause");
+        //stopServer(null);
+        //unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        System.out.println("On Destroy");
+
+        stopServer(null);
+
+        //stopService(serverServiceIntent);
+
+        //Unregister broadcast receiver
+        try {
+            unregisterReceiver(mReceiver);
+        } catch (IllegalArgumentException e) {
+            // This will happen if the server was never running and the stop
+            // button was pressed.
+            // Do nothing in this case.
+        }
     }
 }

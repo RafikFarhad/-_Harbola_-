@@ -49,7 +49,7 @@ public class Admin_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
             if(networkState.isConnected())
             {
-                mActivity.refresh("Connection Status: Connected " + " to " + networkState.toString());
+                //mActivity.refresh("Connection Status: Connected " + " to " + networkState.toString());
                 //activity.setServerStatus("Connection Status: Connected");
             }
             else
