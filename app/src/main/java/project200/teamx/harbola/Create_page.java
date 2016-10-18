@@ -13,8 +13,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Parcel;
+import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,6 +48,18 @@ public class Create_page extends AppCompatActivity {
     BroadcastReceiver mReceiver;
     IntentFilter mIntentFilter;
 
+    private boolean connectedAndReadyToSendFile;
+
+    private boolean filePathProvided;
+    private File fileToSend;
+    private boolean transferActive;
+
+    private Intent clientServiceIntent;
+    private WifiP2pDevice targetDevice;
+    private WifiP2pInfo wifiInfo;
+
+
+
     ///
     //variable for selection intent
     private final int PICKER = 1;
@@ -70,7 +85,7 @@ public class Create_page extends AppCompatActivity {
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new Admin_WiFiDirectBroadcastReceiver(mManager, mChannel, this);
+        mReceiver = new Client_WiFiDirectBroadcastReceiver(mManager, mChannel, this);
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -79,25 +94,41 @@ public class Create_page extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         registerReceiver(mReceiver, mIntentFilter);
+        connectedAndReadyToSendFile = false;
+        filePathProvided = false;
+        fileToSend = null;
+        transferActive = false;
+        //clientServiceIntent = null;
+        mIntentFilter = null;
+        targetDevice = null;
+        wifiInfo = null;
+
+//        registerReceiver(wifiClientReceiver, wifiClientReceiverIntentFilter);
+
+        setClientFileTransferStatus("Client is currently idle");
+
+//setTargetFileStatus("testing");
+
 
 
         Toast.makeText(getApplicationContext(), "Broadcast", Toast.LENGTH_SHORT).show();
 
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Discovery Process Started", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(int reasonCode) {
-
-                Toast.makeText(getApplicationContext(), "Discovery Process Starting Failed", Toast.LENGTH_LONG).show();
-
-            }
-        });
-
-        /*mManager.createGroup(mChannel, new WifiP2pManager.ActionListener()  {
+//        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+//            @Override
+//            public void onSuccess() {
+//                Toast.makeText(getApplicationContext(), "Discovery Process Started", Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onFailure(int reasonCode) {
+//
+//                Toast.makeText(getApplicationContext(), "Discovery Process Starting Failed", Toast.LENGTH_LONG).show();
+//
+//            }
+//        });
+//
+//
+            /*mManager.createGroup(mChannel, new WifiP2pManager.ActionListener()  {
             public void onSuccess() {
 
                 Toast.makeText(getApplicationContext(), "Group Created Successful", Toast.LENGTH_SHORT).show();
@@ -143,14 +174,14 @@ public class Create_page extends AppCompatActivity {
                 System.out.println("********** = " + listOfAllImages.get(position));
                 Picasso.with(getBaseContext()).load(new File(listOfAllImages.get(position))).into(picView);
                 Toast.makeText(getApplicationContext(), "Send This Image Now", Toast.LENGTH_SHORT).show();
+                fileToSend = new File(listOfAllImages.get(position));
+                filePathProvided = true;
+                sendFile();
+                System.out.println("File Is sending.........");
             }
         });
-
-
         int total = listOfAllImages.size();
         //total = total > 100 ? 100 : total;                                                 /// MAJOR PROBLEM
-
-
         try {
             picGallery.setAdapter(imgAdapt);
         } catch (OutOfMemoryError e) {
@@ -160,6 +191,103 @@ public class Create_page extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    public void setNetworkToReadyState(boolean status, WifiP2pInfo info, WifiP2pDevice device)
+    {
+        wifiInfo = info;
+        targetDevice = device;
+        connectedAndReadyToSendFile = status;
+    }
+
+    private void stopClientReceiver()
+    {
+        try
+        {
+            unregisterReceiver(mReceiver);
+        }
+        catch(IllegalArgumentException e)
+        {
+            //This will happen if the server was never running and the stop button was pressed.
+            //Do nothing in this case.
+        }
+    }
+
+    public void searchForPeers(View view) {
+
+        //Discover peers, no call back method given
+        mManager.discoverPeers(mChannel, null);
+
+    }
+
+    public void sendFile() {
+
+        //Only try to send file if there isn't already a transfer active
+        System.out.println("Send File : " + fileToSend.toString());
+        System.out.println("Send File  status: " + filePathProvided + " " + connectedAndReadyToSendFile);
+
+        if(!transferActive)
+        {
+            if(!filePathProvided)
+            {
+                setClientFileTransferStatus("Select a file to send before pressing send");
+            }
+            else if(!connectedAndReadyToSendFile)
+            {
+                setClientFileTransferStatus("You must be connected to a server before attempting to send a file");
+            }
+	        /*
+	        else if(targetDevice == null)
+	        {
+	        	setClientFileTransferStatus("Target Device network information unknown");
+	        }
+	        */
+            else if(wifiInfo == null)
+            {
+                setClientFileTransferStatus("Missing Wifi P2P information");
+            }
+            else
+            {
+                //Launch client service
+                clientServiceIntent = new Intent(this, ClientService.class);
+                clientServiceIntent.putExtra("fileToSend", fileToSend);
+                clientServiceIntent.putExtra("port", new Integer(port));
+                //clientServiceIntent.putExtra("targetDevice", targetDevice);
+                clientServiceIntent.putExtra("wifiInfo", wifiInfo);
+                clientServiceIntent.putExtra("clientResult", new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, final Bundle resultData) {
+
+                        if(resultCode == port )
+                        {
+                            if (resultData == null) {
+                                //Client service has shut down, the transfer may or may not have been successful. Refer to message
+                                transferActive = false;
+                            }
+                            else
+                            {
+                                final TextView client_status_text = (TextView) findViewById(R.id.file_transfer_status);
+
+                                client_status_text.post(new Runnable() {
+                                    public void run() {
+                                        client_status_text.setText((String)resultData.get("message"));
+                                    }
+                                });
+                            }
+                        }
+
+                    }
+                });
+
+                transferActive = true;
+                startService(clientServiceIntent);
+                //end
+            }
+        }
+    }
+
+
+
+    ///////////////////////////////////////////Gallery Area
 
     public static ArrayList<String> getAllShownImagesPath(Activity activity) {
         Uri uri;
@@ -271,11 +399,41 @@ public class Create_page extends AppCompatActivity {
             imageBitmaps[currentPic] = newPic;
         }
     }
+    public void setClientWifiStatus(String message)
+    {
+//        TextView connectionStatusText = (TextView) findViewById(R.id.client_wifi_status_text);
+//        connectionStatusText.setText(message);
+    }
+
+    public void setClientStatus(String message)
+    {
+//        TextView clientStatusText = (TextView) findViewById(R.id.client_status_text);
+//        clientStatusText.setText(message);
+    }
+
+    public void setClientFileTransferStatus(String message)
+    {
+//        TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
+//        fileTransferStatusText.setText(message);
+    }
+
+    public void setTargetFileStatus(String message)
+    {
+//        TextView targetFileStatus = (TextView) findViewById(R.id.selected_filename);
+//        targetFileStatus.setText(message);
+    }
     /* register the broadcast receiver with the intent values to be matched */
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mReceiver, mIntentFilter);
+        try {
+             registerReceiver(mReceiver, mIntentFilter);
+        }
+        catch (Exception e) {
+            // This will happen if the server was never running and the stop
+            // button was pressed.
+            // Do nothing in this case.
+        }
     }
     /* unregister the broadcast receiver */
     @Override

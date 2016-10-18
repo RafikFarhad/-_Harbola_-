@@ -60,6 +60,8 @@ public class ServerService extends IntentService {
 
             welcomeSocket = new ServerSocket(port);
 
+            System.out.println("++++++++++++++++ " + welcomeSocket.toString());
+
             while(true && serviceEnabled)
             {
 
@@ -168,11 +170,11 @@ public class ServerService extends IntentService {
 
 
         } catch (IOException e) {
-            signalActivity(null);
+            signalActivity("IOEXCEPTION");
         }
         catch(Exception e)
         {
-            signalActivity(null);
+            signalActivity("EXCEPTION");
         }
 
         //Signal that operation is complete

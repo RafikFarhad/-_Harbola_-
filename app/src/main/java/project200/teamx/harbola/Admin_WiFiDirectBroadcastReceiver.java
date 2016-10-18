@@ -16,11 +16,11 @@ public class Admin_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
-    private Create_page mActivity;
+    private Join_page mActivity;
     WifiP2pManager.PeerListListener myPeerListListener;
 
 
-    public Admin_WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, Create_page activity) {
+    public Admin_WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, Join_page activity) {
         super();
         this.mManager = manager;
         this.mChannel = channel;
@@ -40,10 +40,25 @@ public class Admin_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
         else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
 
+            mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
+
+                public void onPeersAvailable(WifiP2pDeviceList peers) {
+                    mActivity.displayPeers(peers);
+                }
+            });
+
+
         }
         else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
 
             // Respond to new connection or disconnections
+            mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
+
+                public void onPeersAvailable(WifiP2pDeviceList peers) {
+                    mActivity.displayPeers(peers);
+
+                }
+            });
 
             NetworkInfo networkState = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
 

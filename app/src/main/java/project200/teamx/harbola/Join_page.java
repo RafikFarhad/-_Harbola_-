@@ -43,10 +43,10 @@ public class Join_page extends AppCompatActivity {
     BroadcastReceiver mReceiver;
     IntentFilter mIntentFilter;
     WifiP2pDevice targetDevice;
-    private WifiP2pManager wifiManager;
-    private WifiP2pManager.Channel wifichannel;
-    private BroadcastReceiver wifiServerReceiver;
-    private IntentFilter wifiServerReceiverIntentFilter;
+    //    private WifiP2pManager wifiManager;
+//    private WifiP2pManager.Channel wifichannel;
+//    private BroadcastReceiver wifiServerReceiver;
+//    private IntentFilter wifiServerReceiverIntentFilter;
     private String path;
     private File downloadTarget;
     private Intent serverServiceIntent;
@@ -60,7 +60,7 @@ public class Join_page extends AppCompatActivity {
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new Client_WiFiDirectBroadcastReceiver(mManager, mChannel, this);
+        mReceiver = new Admin_WiFiDirectBroadcastReceiver(mManager, mChannel, this);
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -69,7 +69,7 @@ public class Join_page extends AppCompatActivity {
         mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
         registerReceiver(mReceiver, mIntentFilter);
-        searchForPeers();
+        //searchForPeers();
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -94,7 +94,8 @@ public class Join_page extends AppCompatActivity {
         setServerFileTransferStatus("No File being transfered");
 
         //registerReceiver(wifiServerReceiver, wifiServerReceiverIntentFilter);
-        startServer();
+//        startServer();
+        //displayPeers();
     }
 
     public void startServer() {
@@ -113,6 +114,7 @@ public class Join_page extends AppCompatActivity {
                 protected void onReceiveResult(int resultCode, final Bundle resultData) {
                     if(resultCode == port )
                     {
+                        System.out.println("--------------- result: " );
                         if (resultData == null) {
                             //Server service has shut down. Download may or may not have completed properly.
                             serverThreadActive = false;
@@ -128,6 +130,7 @@ public class Join_page extends AppCompatActivity {
                             final TextView server_file_status_text = (TextView) findViewById(R.id.server_file_transfer_status);
                             server_file_status_text.post(new Runnable() {
                                 public void run() {
+                                    System.out.println("--------------- result: " + resultData.getString("path_for_showcase"));
                                     String msg = (String)resultData.get("message");
                                     if(msg!=null) server_file_status_text.setText(msg);
                                     String path_for_shocase = (String) resultData.get("path_for_showcase");
@@ -202,9 +205,10 @@ public class Join_page extends AppCompatActivity {
         ArrayList<String> peersStringArrayList = new ArrayList<String>();
 
         //Fill array list with strings of peer names
+        int t = 1;
         for(WifiP2pDevice wd : peers.getDeviceList())
         {
-            peersStringArrayList.add(wd.deviceName);
+            peersStringArrayList.add( t + " . -" + wd.deviceName);
         }
 
         //Set list view as clickable
@@ -228,14 +232,17 @@ public class Join_page extends AppCompatActivity {
 
                 //Search all known peers for matching name
                 for(WifiP2pDevice wd : peers.getDeviceList()) {
-                    if(wd.deviceName.equals(tv.getText()))
+                    String test = tv.getText().toString();
+                    test = test.substring(test.indexOf("-")+1);
+//                    dialog.setMessage(test);
+//                    dialog.show();
+                    if(wd.deviceName.equals(test))
                         device = wd;
                 }
 
                 if(device != null){
                     //Connect to selected peer
                     connectToPeer(device);
-
                 }
                 else {
                     dialog.setMessage("Failed");
@@ -256,6 +263,7 @@ public class Join_page extends AppCompatActivity {
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener()  {
             public void onSuccess() {
                 Toast.makeText(getApplicationContext(), "Connection to " + targetDevice.deviceName + " sucessful", Toast.LENGTH_LONG).show();
+                startServer();
                 //setClientStatus("Connection to " + targetDevice.deviceName + " sucessful");
             }
 

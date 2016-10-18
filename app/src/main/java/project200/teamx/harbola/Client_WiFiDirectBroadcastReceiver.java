@@ -20,11 +20,11 @@ public class Client_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
     private WifiP2pManager mManager;
     private WifiP2pManager.Channel mChannel;
-    private Join_page mActivity;
+    private Create_page mActivity;
     WifiP2pManager.PeerListListener myPeerListListener;
 
 
-    public Client_WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, Join_page activity) {
+    public Client_WiFiDirectBroadcastReceiver(WifiP2pManager manager, WifiP2pManager.Channel channel, Create_page activity) {
         super();
         this.mManager = manager;
         this.mChannel = channel;
@@ -52,12 +52,12 @@ public class Client_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 //            }
             //This broadcast is sent when status of in range peers changes. Attempt to get current list of peers.
 
-            mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
-
-                public void onPeersAvailable(WifiP2pDeviceList peers) {
-                    mActivity.displayPeers(peers);
-                }
-            });
+//            mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
+//
+//                public void onPeersAvailable(WifiP2pDeviceList peers) {
+//                    mActivity.displayPeers(peers);
+//                }
+//            });
 
             //update UI with list of peers
         }
@@ -72,8 +72,8 @@ public class Client_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 //set client state so that all needed fields to make a transfer are ready
                 System.out.println("Connection Status: Connected");
                 //activity.setTransferStatus(true);
-//                mActivity.setNetworkToReadyState(true, wifiInfo, device);
-//                mActivity.setClientStatus("Connection Status: Connected");
+                mActivity.setNetworkToReadyState(true, wifiInfo, device);
+                mActivity.setClientStatus("Connection Status: Connected");
             }
             else
             {

@@ -51,10 +51,12 @@ public class ClientService extends IntentService {
         //targetDevice = (WifiP2pDevice) intent.getExtras().get("targetDevice");
         wifiInfo = (WifiP2pInfo) intent.getExtras().get("wifiInfo");
 
-        if(!wifiInfo.isGroupOwner)
+        //if(wifiInfo.isGroupOwner)
         {
             //targetDevice.
             //signalActivity(wifiInfo.isGroupOwner + " Transfering file " + fileToSend.getName() + " to " + wifiInfo.groupOwnerAddress.toString()  + " on TCP Port: " + port );
+
+            System.out.println("Reached Client Service");
 
             InetAddress targetIP = wifiInfo.groupOwnerAddress;
 
@@ -154,11 +156,11 @@ public class ClientService extends IntentService {
             }
 
         }
-        else
-        {
-            signalActivity("This device is a group owner, therefore the IP address of the " +
-                    "target device cannot be determined. File transfer cannot continue");
-        }
+//        else
+//        {
+//            signalActivity("This device is a group owner, therefore the IP address of the " +
+//                    "target device cannot be determined. File transfer cannot continue");
+//        }
 
 
         clientResult.send(port, null);
