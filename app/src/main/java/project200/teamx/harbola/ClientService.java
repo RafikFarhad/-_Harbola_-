@@ -58,13 +58,15 @@ public class ClientService extends IntentService {
 
             System.out.println("Reached Client Service");
 
-            InetAddress targetIP = wifiInfo.groupOwnerAddress;
+            //InetAddress targetIP = wifiInfo.groupOwnerAddress;
+            //System.out.println("target ip: " + targetIP.toString());
 
             Socket clientSocket = null;
             OutputStream os = null;
 
             try {
 
+                InetAddress targetIP = InetAddress.getByName("10.0.2.2");
                 clientSocket = new Socket(targetIP, port);
                 os = clientSocket.getOutputStream();
                 PrintWriter pw = new PrintWriter(os);
@@ -75,9 +77,6 @@ public class ClientService extends IntentService {
                 BufferedReader br = new BufferedReader(isr);
 
                 signalActivity("About to start handshake");
-
-
-
                 //Client-Server handshake
 				/*
 				pw.println(fileToSend.getName());
@@ -147,12 +146,13 @@ public class ClientService extends IntentService {
 
 
             } catch (IOException e) {
+                System.out.println("IOEXCEPTION");
                 signalActivity(e.getMessage());
             }
             catch(Exception e)
             {
+                System.out.println("EXCEPTION");
                 signalActivity(e.getMessage());
-
             }
 
         }

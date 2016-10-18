@@ -308,6 +308,7 @@ public class Create_page extends AppCompatActivity {
             listOfAllImages.add(absolutePathOfImage);
             //System.out.println(absolutePathOfImage);
         }
+        cursor.close();
         return listOfAllImages;
     }
 

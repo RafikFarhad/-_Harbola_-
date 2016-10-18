@@ -13,8 +13,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+
 import android.os.Bundle;
 import android.app.IntentService;
 import android.content.Intent;
@@ -56,11 +59,16 @@ public class ServerService extends IntentService {
         ServerSocket welcomeSocket = null;
         Socket socket = null;
 
-        try {
 
-            welcomeSocket = new ServerSocket(port);
+
+        try {
+            System.out.println("++++++++++++++++ ");
+            InetAddress addr = InetAddress.getByName("10.0.2.2");
+            System.out.println("****************** ");
+            welcomeSocket = new ServerSocket(port, 50, addr);
 
             System.out.println("++++++++++++++++ " + welcomeSocket.toString());
+            System.out.println("++++++++++++++++ " + serviceEnabled);
 
             while(true && serviceEnabled)
             {

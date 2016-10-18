@@ -7,16 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
-import android.os.Environment;
+import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,10 +23,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class Join_page extends AppCompatActivity {
@@ -85,7 +80,7 @@ public class Join_page extends AppCompatActivity {
         TextView serverServiceStatus = (TextView) findViewById(R.id.server_status_text);
         serverServiceStatus.setText("server_stopped");
 
-        path = "/Harbola/";
+        path = "/";
         downloadTarget = new File(path);
 
         serverServiceIntent = null;
