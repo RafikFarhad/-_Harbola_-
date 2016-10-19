@@ -8,6 +8,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 
@@ -47,17 +48,40 @@ public class Client_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             // request available peers from the wifi p2p manager. This is an
             // asynchronous call and the calling activity is notified with a
             // callback on PeerListListener.onPeersAvailable()
-//            if (mManager != null) {
-//                mManager.requestPeers(mChannel, myPeerListListener);
-//            }
+            if (mManager != null) {
+                mManager.requestPeers(mChannel, myPeerListListener);
+//                mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
+//
+//                    public void onPeersAvailable(WifiP2pDeviceList peers) {
+//
+//                        System.out.println("PEERS AVAILABLE " );
+//
+//                        WifiP2pDevice device = null;
+//
+//                        //Search all known peers for matching name
+//                        for(WifiP2pDevice wd : peers.getDeviceList()) {
+//
+//                            device = wd;
+//                            System.out.println("PEERS AVAILABLE "  + wd.deviceAddress + " " + device.deviceAddress
+//                                    + " " + device.isGroupOwner() + " " + device.status
+//                            );
+//                        }
+//
+//                        if(device != null){
+//                            //Connect to selected peer
+//                            mActivity.connectToPeer_Create_page(device);
+//                        }
+//                        else {
+//                            System.out.println("*PEERS connection failed");
+//
+//                        }
+//                        //mActivity.displayPeers(peers);
+//                    }
+//                });
+            }
             //This broadcast is sent when status of in range peers changes. Attempt to get current list of peers.
 
-//            mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
-//
-//                public void onPeersAvailable(WifiP2pDeviceList peers) {
-//                    mActivity.displayPeers(peers);
-//                }
-//            });
+
 
             //update UI with list of peers
         }

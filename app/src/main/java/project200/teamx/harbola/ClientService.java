@@ -48,17 +48,17 @@ public class ClientService extends IntentService {
         port = ((Integer) intent.getExtras().get("port")).intValue();
         fileToSend = (File) intent.getExtras().get("fileToSend");
         clientResult = (ResultReceiver) intent.getExtras().get("clientResult");
-        //targetDevice = (WifiP2pDevice) intent.getExtras().get("targetDevice");
+        targetDevice = (WifiP2pDevice) intent.getExtras().get("targetDevice");
         wifiInfo = (WifiP2pInfo) intent.getExtras().get("wifiInfo");
 
-        //if(wifiInfo.isGroupOwner)
+        if(!wifiInfo.isGroupOwner)
         {
             //targetDevice.
             //signalActivity(wifiInfo.isGroupOwner + " Transfering file " + fileToSend.getName() + " to " + wifiInfo.groupOwnerAddress.toString()  + " on TCP Port: " + port );
 
             System.out.println("Reached Client Service");
 
-            //InetAddress targetIP = wifiInfo.groupOwnerAddress;
+            InetAddress targetIP = wifiInfo.groupOwnerAddress;
             //System.out.println("target ip: " + targetIP.toString());
 
             Socket clientSocket = null;
@@ -66,7 +66,7 @@ public class ClientService extends IntentService {
 
             try {
 
-                InetAddress targetIP = InetAddress.getByName("10.0.2.2");
+                //InetAddress targetIP = InetAddress.getByName("10.0.2.2");
                 clientSocket = new Socket(targetIP, port);
                 os = clientSocket.getOutputStream();
                 PrintWriter pw = new PrintWriter(os);
@@ -156,11 +156,11 @@ public class ClientService extends IntentService {
             }
 
         }
-//        else
-//        {
-//            signalActivity("This device is a group owner, therefore the IP address of the " +
-//                    "target device cannot be determined. File transfer cannot continue");
-//        }
+        else
+        {
+            signalActivity("This device is a group owner, therefore the IP address of the " +
+                    "target device cannot be determined. File transfer cannot continue");
+        }
 
 
         clientResult.send(port, null);

@@ -13,7 +13,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Parcel;
@@ -78,10 +80,8 @@ public class Create_page extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_page);
-
         /// Intent is created
         System.out.println("On Create");
-
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
@@ -113,20 +113,48 @@ public class Create_page extends AppCompatActivity {
 
         Toast.makeText(getApplicationContext(), "Broadcast", Toast.LENGTH_SHORT).show();
 
-//        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-//            @Override
-//            public void onSuccess() {
-//                Toast.makeText(getApplicationContext(), "Discovery Process Started", Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onFailure(int reasonCode) {
-//
-//                Toast.makeText(getApplicationContext(), "Discovery Process Starting Failed", Toast.LENGTH_LONG).show();
-//
-//            }
-//        });
-//
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(getApplicationContext(), "Discovery Process Started", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFailure(int reasonCode) {
+
+                Toast.makeText(getApplicationContext(), "Discovery Process Starting Failed", Toast.LENGTH_LONG).show();
+
+            }
+        });
+        mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
+
+            public void onPeersAvailable(WifiP2pDeviceList peers) {
+
+                System.out.println("PEERS AVAILABLE " );
+
+                WifiP2pDevice device = null;
+
+                //Search all known peers for matching name
+                for(WifiP2pDevice wd : peers.getDeviceList()) {
+
+                    device = wd;
+                    System.out.println("PEERS AVAILABLE "  + wd.deviceAddress + " " + device.deviceAddress
+                            + " " + device.isGroupOwner() + " " + device.status
+                    );
+                }
+
+                if(device != null){
+                    //Connect to selected peer
+                    connectToPeer_Create_page(device);
+                }
+                else {
+                    System.out.println("*PEERS connection failed");
+
+                }
+                //mActivity.displayPeers(peers);
+            }
+        });
+
 //
             /*mManager.createGroup(mChannel, new WifiP2pManager.ActionListener()  {
             public void onSuccess() {
@@ -181,7 +209,7 @@ public class Create_page extends AppCompatActivity {
             }
         });
         int total = listOfAllImages.size();
-        //total = total > 100 ? 100 : total;                                                 /// MAJOR PROBLEM
+        total = total > 100 ? 100 : total;                                                 /// MAJOR PROBLEM
         try {
             picGallery.setAdapter(imgAdapt);
         } catch (OutOfMemoryError e) {
@@ -190,6 +218,28 @@ public class Create_page extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Error in reading external storage!", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+    public void connectToPeer_Create_page(final WifiP2pDevice wifiPeer)
+    {
+        this.targetDevice = wifiPeer;
+
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = wifiPeer.deviceAddress;
+        System.out.println("Reached CRETAE PAGE CONNECT TO PEER " + config.toString());
+        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener()  {
+            public void onSuccess() {
+                Toast.makeText(getApplicationContext(), "Connection to " + targetDevice.deviceName + " sucessful", Toast.LENGTH_LONG).show();
+
+                //startServer();
+                //setClientStatus("Connection to " + targetDevice.deviceName + " sucessful");
+            }
+
+            public void onFailure(int reason) {
+                //setClientStatus("Connection to " + targetDevice.deviceName + " failed");
+
+            }
+        });
+
     }
 
     public void setNetworkToReadyState(boolean status, WifiP2pInfo info, WifiP2pDevice device)
@@ -235,12 +285,12 @@ public class Create_page extends AppCompatActivity {
             {
                 setClientFileTransferStatus("You must be connected to a server before attempting to send a file");
             }
-	        /*
+
 	        else if(targetDevice == null)
 	        {
 	        	setClientFileTransferStatus("Target Device network information unknown");
 	        }
-	        */
+
             else if(wifiInfo == null)
             {
                 setClientFileTransferStatus("Missing Wifi P2P information");
@@ -251,7 +301,7 @@ public class Create_page extends AppCompatActivity {
                 clientServiceIntent = new Intent(this, ClientService.class);
                 clientServiceIntent.putExtra("fileToSend", fileToSend);
                 clientServiceIntent.putExtra("port", new Integer(port));
-                //clientServiceIntent.putExtra("targetDevice", targetDevice);
+                clientServiceIntent.putExtra("targetDevice", targetDevice);
                 clientServiceIntent.putExtra("wifiInfo", wifiInfo);
                 clientServiceIntent.putExtra("clientResult", new ResultReceiver(null) {
                     @Override

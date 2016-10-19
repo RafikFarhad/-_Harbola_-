@@ -89,7 +89,7 @@ public class Join_page extends AppCompatActivity {
         setServerFileTransferStatus("No File being transfered");
 
         //registerReceiver(wifiServerReceiver, wifiServerReceiverIntentFilter);
-//        startServer();
+        startServer();
         //displayPeers();
     }
 
@@ -258,7 +258,7 @@ public class Join_page extends AppCompatActivity {
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener()  {
             public void onSuccess() {
                 Toast.makeText(getApplicationContext(), "Connection to " + targetDevice.deviceName + " sucessful", Toast.LENGTH_LONG).show();
-                startServer();
+//                startServer();
                 //setClientStatus("Connection to " + targetDevice.deviceName + " sucessful");
             }
 
@@ -269,13 +269,13 @@ public class Join_page extends AppCompatActivity {
         });
 
     }
-    public void startFileBrowseActivity(View view) {
-
-        Intent clientStartIntent = new Intent(this, FileBrowser.class);
-        startActivityForResult(clientStartIntent, fileRequestID);
-        //Path returned to onActivityResult
-
-    }
+//    public void startFileBrowseActivity(View view) {
+//
+//        Intent clientStartIntent = new Intent(this, FileBrowser.class);
+//        startActivityForResult(clientStartIntent, fileRequestID);
+//        //Path returned to onActivityResult
+//
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

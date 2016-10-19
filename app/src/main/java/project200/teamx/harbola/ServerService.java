@@ -63,9 +63,10 @@ public class ServerService extends IntentService {
 
         try {
             System.out.println("++++++++++++++++ ");
-            InetAddress addr = InetAddress.getByName("10.0.2.2");
+            //InetAddress addr = InetAddress.getByName("10.0.2.2");
+            welcomeSocket = new ServerSocket(port);
             System.out.println("****************** ");
-            welcomeSocket = new ServerSocket(port, 50, addr);
+            //welcomeSocket = new ServerSocket(port, 50, addr);
 
             System.out.println("++++++++++++++++ " + welcomeSocket.toString());
             System.out.println("++++++++++++++++ " + serviceEnabled);
