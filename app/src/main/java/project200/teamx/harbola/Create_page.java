@@ -18,6 +18,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.ResultReceiver;
 import android.provider.MediaStore;
@@ -35,34 +36,35 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 
 public class Create_page extends AppCompatActivity {
 
-    public final int fileRequestID = 55;
-    public final int port = 7950;
-
-    WifiP2pManager mManager;
-    WifiP2pManager.Channel mChannel;
-    BroadcastReceiver mReceiver;
-    IntentFilter mIntentFilter;
+    public final int port = 8080;
 
     private boolean connectedAndReadyToSendFile;
 
-    private boolean filePathProvided;
     private File fileToSend;
     private boolean transferActive;
+    boolean issent;
 
-    private Intent clientServiceIntent;
-    private WifiP2pDevice targetDevice;
-    private WifiP2pInfo wifiInfo;
+    ServerSocket serverSocket;
 
-
-
-    ///
     //variable for selection intent
     private final int PICKER = 1;
     //variable to store the currently selected image
@@ -75,6 +77,7 @@ public class Create_page extends AppCompatActivity {
     private PicAdapter imgAdapt;
     ArrayList<String> listOfAllImages;
 
+    ServerSocketThread serverSocketThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,101 +85,22 @@ public class Create_page extends AppCompatActivity {
         setContentView(R.layout.activity_create_page);
         /// Intent is created
         System.out.println("On Create");
+        System.out.println("IP: " + getIpAddress());
+        TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
+        fileTransferStatusText.setText(getIpAddress() + " " + port);
 
-        mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new Client_WiFiDirectBroadcastReceiver(mManager, mChannel, this);
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-        registerReceiver(mReceiver, mIntentFilter);
         connectedAndReadyToSendFile = false;
-        filePathProvided = false;
         fileToSend = null;
         transferActive = false;
-        //clientServiceIntent = null;
-        mIntentFilter = null;
-        targetDevice = null;
-        wifiInfo = null;
+        issent = false;
 
-//        registerReceiver(wifiClientReceiver, wifiClientReceiverIntentFilter);
-
+        fileToSend = new File("/test.png");
+        serverSocketThread = new ServerSocketThread();
+        serverSocketThread.start();
         setClientFileTransferStatus("Client is currently idle");
-
-//setTargetFileStatus("testing");
-
-
 
         Toast.makeText(getApplicationContext(), "Broadcast", Toast.LENGTH_SHORT).show();
 
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Discovery Process Started", Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onFailure(int reasonCode) {
-
-                Toast.makeText(getApplicationContext(), "Discovery Process Starting Failed", Toast.LENGTH_LONG).show();
-
-            }
-        });
-        mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
-
-            public void onPeersAvailable(WifiP2pDeviceList peers) {
-
-                System.out.println("PEERS AVAILABLE " );
-
-                WifiP2pDevice device = null;
-
-                //Search all known peers for matching name
-                for(WifiP2pDevice wd : peers.getDeviceList()) {
-
-                    device = wd;
-                    System.out.println("PEERS AVAILABLE "  + wd.deviceAddress + " " + device.deviceAddress
-                            + " " + device.isGroupOwner() + " " + device.status
-                    );
-                }
-
-                if(device != null){
-                    //Connect to selected peer
-                    connectToPeer_Create_page(device);
-                }
-                else {
-                    System.out.println("*PEERS connection failed");
-
-                }
-                //mActivity.displayPeers(peers);
-            }
-        });
-
-//
-            /*mManager.createGroup(mChannel, new WifiP2pManager.ActionListener()  {
-            public void onSuccess() {
-
-                Toast.makeText(getApplicationContext(), "Group Created Successful", Toast.LENGTH_SHORT).show();
-                System.out.println("Group Created Successful");
-                //setServerFileTransferStatus("WiFi Group creation successful");
-                //Group creation successful
-            }
-            public void onFailure(int reason) {
-
-                Toast.makeText(getApplicationContext(), "Group Created Failed " + String.valueOf(reason), Toast.LENGTH_SHORT).show();
-                System.out.println("Group Created Failed " + reason);
-                //setServerFileTransferStatus("WiFi Group creation failed");
-                //Group creation failed
-            }
-        });*/
-
-
-        //// FOR VIEW CUSTOM GALLERY
-
-        //get the large image view
         picView = (ImageView) findViewById(R.id.picture);
 
         //get the gallery view
@@ -191,25 +115,9 @@ public class Create_page extends AppCompatActivity {
         currentPic = 1;
 
         listOfAllImages = getAllShownImagesPath(this);
-
-
         System.out.println("SIZE:   " + listOfAllImages.size());
-        picGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            //handle clicks
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                //set the larger image view to display the chosen bitmap calling method of adapter class
-                //picView.setImageBitmap(BitmapFactory.decodeFile(new File(listOfAllImages.get(position)).getAbsolutePath()));
-                System.out.println("********** = " + listOfAllImages.get(position));
-                Picasso.with(getBaseContext()).load(new File(listOfAllImages.get(position))).into(picView);
-                Toast.makeText(getApplicationContext(), "Send This Image Now", Toast.LENGTH_SHORT).show();
-                fileToSend = new File(listOfAllImages.get(position));
-                filePathProvided = true;
-                sendFile();
-                System.out.println("File Is sending.........");
-            }
-        });
         int total = listOfAllImages.size();
-        total = total > 100 ? 100 : total;                                                 /// MAJOR PROBLEM
+        total = total > 50 ? 50 : total;               /// MAJOR PROBLEM
         try {
             picGallery.setAdapter(imgAdapt);
         } catch (OutOfMemoryError e) {
@@ -218,122 +126,261 @@ public class Create_page extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Error in reading external storage!", Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
-    }
-    public void connectToPeer_Create_page(final WifiP2pDevice wifiPeer)
-    {
-        this.targetDevice = wifiPeer;
-
-        WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = wifiPeer.deviceAddress;
-        System.out.println("Reached CRETAE PAGE CONNECT TO PEER " + config.toString());
-        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener()  {
-            public void onSuccess() {
-                Toast.makeText(getApplicationContext(), "Connection to " + targetDevice.deviceName + " sucessful", Toast.LENGTH_LONG).show();
-
-                //startServer();
-                //setClientStatus("Connection to " + targetDevice.deviceName + " sucessful");
-            }
-
-            public void onFailure(int reason) {
-                //setClientStatus("Connection to " + targetDevice.deviceName + " failed");
-
+        picGallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            //handle clicks
+            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                //set the larger image view to display the chosen bitmap calling method of adapter class
+                //picView.setImageBitmap(BitmapFactory.decodeFile(new File(listOfAllImages.get(position)).getAbsolutePath()));
+                System.out.println("********** = " + listOfAllImages.get(position));
+                Picasso.with(getBaseContext()).load(new File(listOfAllImages.get(position))).into(picView);
+                Toast.makeText(getApplicationContext(), "Sending This Image", Toast.LENGTH_SHORT).show();
+                fileToSend = new File(listOfAllImages.get(position));
+                serverSocketThread.interrupt();
+                serverSocketThread = new ServerSocketThread();
+                serverSocketThread.start();
+                // sendFile();
+                System.out.println("File Is sending......... " + fileToSend.getName());
             }
         });
 
     }
 
-    public void setNetworkToReadyState(boolean status, WifiP2pInfo info, WifiP2pDevice device)
-    {
-        wifiInfo = info;
-        targetDevice = device;
-        connectedAndReadyToSendFile = status;
-    }
 
-    private void stopClientReceiver()
-    {
-        try
-        {
-            unregisterReceiver(mReceiver);
-        }
-        catch(IllegalArgumentException e)
-        {
-            //This will happen if the server was never running and the stop button was pressed.
-            //Do nothing in this case.
-        }
-    }
+    private String getIpAddress() {
+        String ip = "";
+        try {
+            Enumeration<NetworkInterface> enumNetworkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (enumNetworkInterfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = enumNetworkInterfaces
+                        .nextElement();
+                Enumeration<InetAddress> enumInetAddress = networkInterface
+                        .getInetAddresses();
+                while (enumInetAddress.hasMoreElements()) {
+                    InetAddress inetAddress = enumInetAddress.nextElement();
 
-    public void searchForPeers(View view) {
-
-        //Discover peers, no call back method given
-        mManager.discoverPeers(mChannel, null);
-
-    }
-
-    public void sendFile() {
-
-        //Only try to send file if there isn't already a transfer active
-        System.out.println("Send File : " + fileToSend.toString());
-        System.out.println("Send File  status: " + filePathProvided + " " + connectedAndReadyToSendFile);
-
-        if(!transferActive)
-        {
-            if(!filePathProvided)
-            {
-                setClientFileTransferStatus("Select a file to send before pressing send");
-            }
-            else if(!connectedAndReadyToSendFile)
-            {
-                setClientFileTransferStatus("You must be connected to a server before attempting to send a file");
-            }
-
-	        else if(targetDevice == null)
-	        {
-	        	setClientFileTransferStatus("Target Device network information unknown");
-	        }
-
-            else if(wifiInfo == null)
-            {
-                setClientFileTransferStatus("Missing Wifi P2P information");
-            }
-            else
-            {
-                //Launch client service
-                clientServiceIntent = new Intent(this, ClientService.class);
-                clientServiceIntent.putExtra("fileToSend", fileToSend);
-                clientServiceIntent.putExtra("port", new Integer(port));
-                clientServiceIntent.putExtra("targetDevice", targetDevice);
-                clientServiceIntent.putExtra("wifiInfo", wifiInfo);
-                clientServiceIntent.putExtra("clientResult", new ResultReceiver(null) {
-                    @Override
-                    protected void onReceiveResult(int resultCode, final Bundle resultData) {
-
-                        if(resultCode == port )
-                        {
-                            if (resultData == null) {
-                                //Client service has shut down, the transfer may or may not have been successful. Refer to message
-                                transferActive = false;
-                            }
-                            else
-                            {
-                                final TextView client_status_text = (TextView) findViewById(R.id.file_transfer_status);
-
-                                client_status_text.post(new Runnable() {
-                                    public void run() {
-                                        client_status_text.setText((String)resultData.get("message"));
-                                    }
-                                });
-                            }
-                        }
-
+                    if (inetAddress.isSiteLocalAddress()) {
+                        ip += "SiteLocalAddress: "   + inetAddress.getHostAddress() + "\n";
                     }
-                });
 
-                transferActive = true;
-                startService(clientServiceIntent);
-                //end
+                }
+
+            }
+
+        } catch (SocketException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            ip += "Something Wrong! " + e.toString() + "\n";
+        }
+
+        return ip;
+    }
+
+    public class ServerSocketThread extends Thread {
+
+        @Override
+        public void run() {
+            Socket socket = null;
+
+            try {
+                serverSocket = new ServerSocket(port);
+                serverSocket.setReuseAddress(true);
+                //serverSocket.bind(new InetSocketAddress(port));
+                Create_page.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        System.out.println("I'm waiting here: "+ serverSocket.getLocalPort());
+                    }});
+
+                while (true) {
+                    socket = serverSocket.accept();
+                    FileTxThread fileTxThread = new FileTxThread(socket);
+                    fileTxThread.start();
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
             }
         }
+
     }
+
+    public class FileTxThread extends Thread {
+        Socket socket;
+
+        FileTxThread(Socket socket){
+            this.socket= socket;
+        }
+
+        @Override
+        public void run() {
+//            File file = new File(Environment.getExternalStorageDirectory(), "android-er_sketch_1000.png");
+            File file;
+            file = fileToSend;
+
+            byte[] bytes = new byte[(int) file.length()];
+            BufferedInputStream bis;
+            try {
+                bis = new BufferedInputStream(new FileInputStream(file));
+                bis.read(bytes, 0, bytes.length);
+
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                oos.writeObject(bytes);
+                oos.flush();
+
+                socket.close();
+
+                final String sentMsg = "File sent to: " + socket.getInetAddress();
+
+                Create_page.this.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(Create_page.this, sentMsg, Toast.LENGTH_LONG).show();
+                    }});
+
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+
+//    public void connectToPeer_Create_page(final WifiP2pDevice wifiPeer)
+//    {
+//        this.targetDevice = wifiPeer;
+//
+//        WifiP2pConfig config = new WifiP2pConfig();
+//        config.deviceAddress = wifiPeer.deviceAddress;
+//        System.out.println("Reached CRETAE PAGE CONNECT TO PEER " + config.toString());
+//        mManager.connect(mChannel, config, new WifiP2pManager.ActionListener()  {
+//            public void onSuccess() {
+//                Toast.makeText(getApplicationContext(), "Connection to " + targetDevice.deviceName + " sucessful", Toast.LENGTH_LONG).show();
+//
+//                //startServer();
+//                //setClientStatus("Connection to " + targetDevice.deviceName + " sucessful");
+//            }
+//
+//            public void onFailure(int reason) {
+//                //setClientStatus("Connection to " + targetDevice.deviceName + " failed");
+//
+//            }
+//        });
+//
+//    }
+//
+//    public void setNetworkToReadyState(boolean status, WifiP2pInfo info, WifiP2pDevice device)
+//    {
+//        wifiInfo = info;
+//        targetDevice = device;
+//        connectedAndReadyToSendFile = status;
+//    }
+
+//    private void stopClientReceiver()
+//    {
+//        try
+//        {
+//            unregisterReceiver(mReceiver);
+//        }
+//        catch(IllegalArgumentException e)
+//        {
+//            //This will happen if the server was never running and the stop button was pressed.
+//            //Do nothing in this case.
+//        }
+//    }
+//
+//    public void searchForPeers(View view) {
+//
+//        //Discover peers, no call back method given
+//        mManager.discoverPeers(mChannel, null);
+//
+//    }
+
+//    public void sendFile() {
+//
+//        //Only try to send file if there isn't already a transfer active
+//        System.out.println("Send File : " + fileToSend.toString());
+//        System.out.println("Send File  status: " + filePathProvided + " " + connectedAndReadyToSendFile);
+//
+//        if(!transferActive)
+//        {
+//            if(!filePathProvided)
+//            {
+//                setClientFileTransferStatus("Select a file to send before pressing send");
+//            }
+//            else if(!connectedAndReadyToSendFile)
+//            {
+//                setClientFileTransferStatus("You must be connected to a server before attempting to send a file");
+//            }
+//
+//	        else if(targetDevice == null)
+//	        {
+//	        	setClientFileTransferStatus("Target Device network information unknown");
+//	        }
+//
+//            else if(wifiInfo == null)
+//            {
+//                setClientFileTransferStatus("Missing Wifi P2P information");
+//            }
+//            else
+//            {
+//                //Launch client service
+//                clientServiceIntent = new Intent(this, ClientService.class);
+//                clientServiceIntent.putExtra("fileToSend", fileToSend);
+//                clientServiceIntent.putExtra("port", new Integer(port));
+//                clientServiceIntent.putExtra("targetDevice", targetDevice);
+//                clientServiceIntent.putExtra("wifiInfo", wifiInfo);
+//                clientServiceIntent.putExtra("clientResult", new ResultReceiver(null) {
+//                    @Override
+//                    protected void onReceiveResult(int resultCode, final Bundle resultData) {
+//
+//                        if(resultCode == port )
+//                        {
+//                            if (resultData == null) {
+//                                //Client service has shut down, the transfer may or may not have been successful. Refer to message
+//                                transferActive = false;
+//                            }
+//                            else
+//                            {
+//                                final TextView client_status_text = (TextView) findViewById(R.id.file_transfer_status);
+//
+//                                client_status_text.post(new Runnable() {
+//                                    public void run() {
+//                                        client_status_text.setText((String)resultData.get("message"));
+//                                    }
+//                                });
+//                            }
+//                        }
+//
+//                    }
+//                });
+//
+//                transferActive = true;
+//                startService(clientServiceIntent);
+//                //end
+//            }
+//        }
+//    }
 
 
 
@@ -478,7 +525,7 @@ public class Create_page extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         try {
-             registerReceiver(mReceiver, mIntentFilter);
+            //registerReceiver(mReceiver, mIntentFilter);
         }
         catch (Exception e) {
             // This will happen if the server was never running and the stop
@@ -490,7 +537,21 @@ public class Create_page extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mReceiver);
+        //unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
 }

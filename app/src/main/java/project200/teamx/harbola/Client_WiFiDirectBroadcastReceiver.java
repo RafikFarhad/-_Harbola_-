@@ -96,7 +96,7 @@ public class Client_WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                 //set client state so that all needed fields to make a transfer are ready
                 System.out.println("Connection Status: Connected");
                 //activity.setTransferStatus(true);
-                mActivity.setNetworkToReadyState(true, wifiInfo, device);
+                //mActivity.setNetworkToReadyState(true, wifiInfo, device);
                 mActivity.setClientStatus("Connection Status: Connected");
             }
             else

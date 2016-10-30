@@ -10,6 +10,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     tools:context="com.project200.teamx.harbola.MainActivity">
+    <!---->
 
     <TextView
         android:hint="@string/welcome2"

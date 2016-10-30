@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">হারবোলা</string>
+    <string name="welcome">!_হারবোলা_!</string>
+    <string name="welcome2">ভাগ করুন প্রতিটিখন সবার সাথে\n\n</string>
+    <string name="host">শুরু করুন</string>
+    <string name="guest">যুক্ত হউন</string>
+    <string name="detaills">A Project 200 Creation</string>
+    <string name="gallery">Go To Gallery</string>
+    <string name="save"> সেভ করুন</string>
+    <string name="refresh">রিফ্রেশ</string>
+    <string name="primarystatus">Server Final Status</string>
+
+</resources>

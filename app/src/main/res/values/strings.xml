@@ -6,5 +6,9 @@
     <string name="guest">Join</string>
     <string name="detaills">A Project 200 Creation</string>
     <string name="gallery">Go To Gallery</string>
+    <string name="refresh">Refresh View</string>
+    <string name="save">Save It!</string>
+
+    <string name="primarystatus">Server Final Status</string>
 
 </resources>
