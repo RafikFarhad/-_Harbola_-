@@ -13,6 +13,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -24,6 +26,7 @@ import android.os.ResultReceiver;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +45,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -84,6 +89,7 @@ public class Create_page extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_page);
         /// Intent is created
+        ApManager.setWifiApState(this, true);
         System.out.println("On Create");
         System.out.println("IP: " + getIpAddress());
         TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
@@ -144,7 +150,6 @@ public class Create_page extends AppCompatActivity {
         });
 
     }
-
 
     private String getIpAddress() {
         String ip = "";
