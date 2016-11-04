@@ -8,6 +8,7 @@
     <string name="gallery">Go To Gallery</string>
     <string name="save"> সেভ করুন</string>
     <string name="refresh">রিফ্রেশ</string>
+    <string name="hint">আইপি অ্যাড্রেস</string>
     <string name="primarystatus">Server Final Status</string>
 
 </resources>

@@ -12,21 +12,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="project200.teamx.harbola.Join_page">
 
-    <Button
-        android:text="@string/refresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/refresh"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="Refresh_Clicked"
-        style="@style/Widget.AppCompat.Button.Small" />
-
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:srcCompat="@android:color/black"
         android:id="@+id/ShowCase"
+        android:background="#000000"
+        android:src="@drawable/aux"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:layout_marginBottom="45dp"
@@ -45,8 +36,34 @@
         android:inputType="number"
         android:digits="0123456789."
         android:id="@+id/editText"
-        android:hint="IP Address"
+        android:hint="@string/hint"
         android:textAppearance="@android:style/TextAppearance.Small"
         />
+
+    <Button
+        android:text="@string/refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/refresh"
+        android:onClick="Refresh_Clicked"
+        android:layout_marginRight="28dp"
+        android:layout_marginEnd="28dp"
+        style="@style/MyButton"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="@string/save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="34dp"
+        android:layout_marginStart="34dp"
+        android:id="@+id/button3"
+        style="@style/MyButton"
+        android:onClick="save_it"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

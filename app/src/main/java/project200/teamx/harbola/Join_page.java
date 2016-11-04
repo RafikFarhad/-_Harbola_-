@@ -38,10 +38,12 @@ import android.widget.Toast;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -114,6 +116,30 @@ public class Join_page extends AppCompatActivity {
         });
 
     }
+    public void save_it(View a) throws IOException{
+
+        File src = new File(Environment.getExternalStorageDirectory(), "/test.png");
+        File dst = new File(Environment.getExternalStoragePublicDirectory("/") + "/Harbola");
+        dst.mkdirs();
+        System.out.println("HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe " + dst.getPath().toString());
+        if(!dst.exists()){
+            dst.createNewFile();
+        }
+        dst = new File(dst.toString() + "/Harbola_File_" + System.currentTimeMillis() + ".png");
+
+        InputStream in = new FileInputStream(src);
+        OutputStream out = new FileOutputStream(dst);
+
+        // Transfer bytes from in to out
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+        in.close();
+        out.close();
+
+    }
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -143,7 +169,7 @@ public class Join_page extends AppCompatActivity {
                 //socket.connect(socketAddress);
                 System.out.println("AFTER SOCKET");
 
-                final File file = new File(Environment.getExternalStorageDirectory(), "test.png");
+                final File file = new File(Environment.getExternalStorageDirectory(), "/test.png");
                 //Toast.makeText(getApplicationContext(), "SERVER CREATED", Toast.LENGTH_SHORT).show();
 
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
@@ -205,8 +231,8 @@ public class Join_page extends AppCompatActivity {
     public void Refresh_Clicked(View view){
 
         //System.out.println("CLiCkED");
-        path = "/";
-        downloadTarget = new File(path + "abc.png");
+        path = Environment.getExternalStorageDirectory() + "/";
+        downloadTarget = new File(path + "test.png");
         EditText ipEditText = (EditText) findViewById(R.id.editText);
         String IP = ipEditText.getText().toString();
         System.out.println("-----IP: " + IP + " " + Patterns.IP_ADDRESS.matcher(IP).matches());

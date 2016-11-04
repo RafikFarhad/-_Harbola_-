@@ -60,6 +60,7 @@ import java.util.List;
 
 public class Create_page extends AppCompatActivity {
 
+    private static int Load_Until = 20;
     public final int port = 8080;
 
     private boolean connectedAndReadyToSendFile;
@@ -89,7 +90,6 @@ public class Create_page extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_page);
         /// Intent is created
-        ApManager.setWifiApState(this, true);
         System.out.println("On Create");
         System.out.println("IP: " + getIpAddress());
         TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
@@ -108,6 +108,7 @@ public class Create_page extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Broadcast", Toast.LENGTH_SHORT).show();
 
         picView = (ImageView) findViewById(R.id.picture);
+        picView.setImageResource(R.drawable.aux);
 
         //get the gallery view
         picGallery = (Gallery) findViewById(R.id.gallery);
@@ -123,7 +124,7 @@ public class Create_page extends AppCompatActivity {
         listOfAllImages = getAllShownImagesPath(this);
         System.out.println("SIZE:   " + listOfAllImages.size());
         int total = listOfAllImages.size();
-        total = total > 50 ? 50 : total;               /// MAJOR PROBLEM
+        total = total > Load_Until ? Load_Until : total;               /// MAJOR PROBLEM
         try {
             picGallery.setAdapter(imgAdapt);
         } catch (OutOfMemoryError e) {
@@ -203,7 +204,15 @@ public class Create_page extends AppCompatActivity {
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                //e.printStackTrace();
+//                Toast.makeText(getApplicationContext(), "Broadcasting stopped by user", Toast.LENGTH_SHORT).show();
+//                Create_page.this.runOnUiThread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        Toast.makeText(Create_page.this,  "Broadcasting stopped by user",  Toast.LENGTH_LONG).show();
+//                    }});
+
             } finally {
                 if (socket != null) {
                     try {
@@ -269,6 +278,180 @@ public class Create_page extends AppCompatActivity {
 
         }
     }
+
+    ///////////////////////////////////////////Gallery Area
+
+    public static ArrayList<String> getAllShownImagesPath(Activity activity) {
+        Uri uri;
+        Cursor cursor;
+        int column_index_data, column_index_folder_name;
+        ArrayList<String> listOfAllImages = new ArrayList<String>();
+        String absolutePathOfImage = null;
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        String[] projection = { MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+
+        cursor = activity.getContentResolver().query(uri, projection, null, null, null);
+
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        int i = 0;
+        while (cursor.moveToNext() && i<Load_Until) {
+            i++;
+            absolutePathOfImage = cursor.getString(column_index_data);
+            listOfAllImages.add(absolutePathOfImage);
+            //System.out.println(absolutePathOfImage);
+        }
+        cursor.close();
+        return listOfAllImages;
+    }
+
+    public class PicAdapter extends BaseAdapter {
+
+        //use the default gallery background image
+        int defaultItemBackground;
+
+        //gallery context
+        private Context galleryContext;
+
+        //array to store bitmaps to display
+        private Bitmap[] imageBitmaps;
+
+        //placeholder bitmap for empty spaces in gallery
+        Bitmap placeholder;
+
+
+        public Context context;
+        private LayoutInflater inflater;
+
+        private String[] imageUrls;
+
+        public PicAdapter(Context c) {
+
+            //instantiate context
+            galleryContext = c;
+
+            //create bitmap array
+            imageBitmaps = new Bitmap[200];
+
+            //decode the placeholder image
+            placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+
+            //more processing
+        }
+
+        //return number of data items i.e. bitmap images
+        public int getCount() {
+            return imageBitmaps.length;
+        }
+
+        //return item at specified position
+        public Object getItem(int position) {
+            return position;
+        }
+
+        //return item ID at specified position
+        public long getItemId(int position) {
+            return position;
+        }
+        //return bitmap at specified position for larger display
+        public Bitmap getPic(int posn) {
+            //return bitmap at posn index
+            return imageBitmaps[posn];
+        }
+        //get view specifies layout and display options for each thumbnail in the gallery
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            //create the view
+            ImageView imageView = new ImageView(galleryContext);
+            //specify the bitmap at this position in the array
+            try {
+                if(position<Load_Until) imageView.setImageBitmap(ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(new File(listOfAllImages.get(position)).getPath()), 100, 100));
+            }
+            catch (OutOfMemoryError e) {
+                Toast.makeText(getApplicationContext(), "OUT OF MEMORY!", Toast.LENGTH_SHORT).show();
+            }
+            catch (Exception e) {
+                Toast.makeText(getApplicationContext(), "Error in readin external storage!", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+//            //imageView.setImageBitmap(imageBitmaps[position]);
+//            //Picasso.with(context).load(listOfAllImages.get(position)).into(imageView);
+//            //set layout options
+//            imageView.setLayoutParams(new Gallery.LayoutParams(300, 200));
+//            //scale type within view area
+//            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//            //set default gallery item background
+//            imageView.setBackgroundResource(defaultItemBackground);
+//            //return the view
+            return imageView;
+        }
+
+        //helper method to add a bitmap to the gallery when the user chooses one
+        public void addPic(Bitmap newPic)
+        {
+            //set at currently selected index
+            imageBitmaps[currentPic] = newPic;
+        }
+    }
+    public void setClientWifiStatus(String message)
+    {
+//        TextView connectionStatusText = (TextView) findViewById(R.id.client_wifi_status_text);
+//        connectionStatusText.setText(message);
+    }
+
+    public void setClientStatus(String message)
+    {
+//        TextView clientStatusText = (TextView) findViewById(R.id.client_status_text);
+//        clientStatusText.setText(message);
+    }
+
+    public void setClientFileTransferStatus(String message)
+    {
+//        TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
+//        fileTransferStatusText.setText(message);
+    }
+
+    public void setTargetFileStatus(String message)
+    {
+//        TextView targetFileStatus = (TextView) findViewById(R.id.selected_filename);
+//        targetFileStatus.setText(message);
+    }
+    /* register the broadcast receiver with the intent values to be matched */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            //registerReceiver(mReceiver, mIntentFilter);
+        }
+        catch (Exception e) {
+            // This will happen if the server was never running and the stop
+            // button was pressed.
+            // Do nothing in this case.
+        }
+    }
+    /* unregister the broadcast receiver */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
 
 
 //    public void connectToPeer_Create_page(final WifiP2pDevice wifiPeer)
@@ -388,175 +571,3 @@ public class Create_page extends AppCompatActivity {
 //    }
 
 
-
-    ///////////////////////////////////////////Gallery Area
-
-    public static ArrayList<String> getAllShownImagesPath(Activity activity) {
-        Uri uri;
-        Cursor cursor;
-        int column_index_data, column_index_folder_name;
-        ArrayList<String> listOfAllImages = new ArrayList<String>();
-        String absolutePathOfImage = null;
-        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-        String[] projection = { MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
-
-        cursor = activity.getContentResolver().query(uri, projection, null, null, null);
-
-        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-        column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-        while (cursor.moveToNext()) {
-            absolutePathOfImage = cursor.getString(column_index_data);
-            listOfAllImages.add(absolutePathOfImage);
-            //System.out.println(absolutePathOfImage);
-        }
-        cursor.close();
-        return listOfAllImages;
-    }
-
-    public class PicAdapter extends BaseAdapter {
-
-        //use the default gallery background image
-        int defaultItemBackground;
-
-        //gallery context
-        private Context galleryContext;
-
-        //array to store bitmaps to display
-        private Bitmap[] imageBitmaps;
-
-        //placeholder bitmap for empty spaces in gallery
-        Bitmap placeholder;
-
-
-        public Context context;
-        private LayoutInflater inflater;
-
-        private String[] imageUrls;
-
-        public PicAdapter(Context c) {
-
-            //instantiate context
-            galleryContext = c;
-
-            //create bitmap array
-            imageBitmaps = new Bitmap[200];
-
-            //decode the placeholder image
-            placeholder = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-
-            //more processing
-        }
-
-        //return number of data items i.e. bitmap images
-        public int getCount() {
-            return imageBitmaps.length;
-        }
-
-        //return item at specified position
-        public Object getItem(int position) {
-            return position;
-        }
-
-        //return item ID at specified position
-        public long getItemId(int position) {
-            return position;
-        }
-        //return bitmap at specified position for larger display
-        public Bitmap getPic(int posn) {
-            //return bitmap at posn index
-            return imageBitmaps[posn];
-        }
-        //get view specifies layout and display options for each thumbnail in the gallery
-        public View getView(int position, View convertView, ViewGroup parent) {
-
-            //create the view
-            ImageView imageView = new ImageView(galleryContext);
-            //specify the bitmap at this position in the array
-            try {
-                imageView.setImageBitmap(ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(new File(listOfAllImages.get(position)).getPath()), 100, 100));
-            }
-            catch (OutOfMemoryError e) {
-                Toast.makeText(getApplicationContext(), "OUT OF MEMORY!", Toast.LENGTH_SHORT).show();
-            }
-            catch (Exception e) {
-                Toast.makeText(getApplicationContext(), "Error in readin external storage!", Toast.LENGTH_SHORT).show();
-                e.printStackTrace();
-            }
-//            //imageView.setImageBitmap(imageBitmaps[position]);
-//            //Picasso.with(context).load(listOfAllImages.get(position)).into(imageView);
-//            //set layout options
-//            imageView.setLayoutParams(new Gallery.LayoutParams(300, 200));
-//            //scale type within view area
-//            imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//            //set default gallery item background
-//            imageView.setBackgroundResource(defaultItemBackground);
-//            //return the view
-            return imageView;
-        }
-
-        //helper method to add a bitmap to the gallery when the user chooses one
-        public void addPic(Bitmap newPic)
-        {
-            //set at currently selected index
-            imageBitmaps[currentPic] = newPic;
-        }
-    }
-    public void setClientWifiStatus(String message)
-    {
-//        TextView connectionStatusText = (TextView) findViewById(R.id.client_wifi_status_text);
-//        connectionStatusText.setText(message);
-    }
-
-    public void setClientStatus(String message)
-    {
-//        TextView clientStatusText = (TextView) findViewById(R.id.client_status_text);
-//        clientStatusText.setText(message);
-    }
-
-    public void setClientFileTransferStatus(String message)
-    {
-//        TextView fileTransferStatusText = (TextView) findViewById(R.id.file_transfer_status);
-//        fileTransferStatusText.setText(message);
-    }
-
-    public void setTargetFileStatus(String message)
-    {
-//        TextView targetFileStatus = (TextView) findViewById(R.id.selected_filename);
-//        targetFileStatus.setText(message);
-    }
-    /* register the broadcast receiver with the intent values to be matched */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        try {
-            //registerReceiver(mReceiver, mIntentFilter);
-        }
-        catch (Exception e) {
-            // This will happen if the server was never running and the stop
-            // button was pressed.
-            // Do nothing in this case.
-        }
-    }
-    /* unregister the broadcast receiver */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //unregisterReceiver(mReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (serverSocket != null) {
-            try {
-                serverSocket.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-    }
-
-}

@@ -5,25 +5,31 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:background="@drawable/main_page4"
     tools:context="com.project200.teamx.harbola.MainActivity">
-    <!---->
 
-    <TextView
-        android:hint="@string/welcome2"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:gravity="center"
+    <Button
+        android:hint="@string/host"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:layout_alignParentTop="true"
+        android:id="@+id/button"
+        android:onClick="create_request"
+        android:layout_marginTop="200dp"
+        android:layout_alignStart="@+id/button2"
+        android:textSize="16dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button2"
+        android:hint="@string/guest"
+        android:onClick="join_request"
+        android:layout_below="@+id/button"
         android:layout_centerHorizontal="true"
-        android:id="@+id/textView" />
+        android:layout_marginTop="5dp"
+        android:textSize="16dp"
+        />
 
     <TextView
         android:hint="@string/detaills"
@@ -33,39 +39,90 @@
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/textView3" />
+        android:id="@+id/textView3"
+        />
 
-    <Button
-        android:hint="@string/host"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:onClick="create_request"
-
-        android:layout_below="@+id/textView2"
-        android:layout_alignLeft="@+id/button2"
-        android:layout_alignStart="@+id/button2" />
-
-    <TextView
-        android:textSize="55dp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="@string/welcome"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button2"
-        android:hint="@string/guest"
-        android:onClick="join_request"
-        android:layout_marginTop="18dp"
-        android:layout_below="@+id/button"
-        android:layout_centerHorizontal="true" />
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/main_page2"-->
+        <!---->
+        <!--android:id="@+id/imageView2" />-->
 </RelativeLayout>
+
+
+
+
+
+<!--:D <?xml version="1.0" encoding="utf-8"?>-->
+
+<!--<RelativeLayout-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--xmlns:tools="http://schemas.android.com/tools"-->
+    <!--android:id="@+id/activity_main"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+    <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+    <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
+    <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
+    <!--tools:context="com.project200.teamx.harbola.MainActivity">-->
+    <!--&lt;!&ndash;&ndash;&gt;-->
+
+    <!--<TextView-->
+        <!--android:hint="@string/welcome2"-->
+        <!--android:textSize="20dp"-->
+        <!--android:textStyle="bold"-->
+        <!--android:gravity="center"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+        <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:id="@+id/textView" />-->
+
+    <!--<TextView-->
+        <!--android:hint="@string/detaills"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+        <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:id="@+id/textView3" />-->
+
+    <!--<Button-->
+        <!--android:hint="@string/host"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/button"-->
+        <!--android:onClick="create_request"-->
+
+        <!--android:layout_below="@+id/textView2"-->
+        <!--android:layout_alignLeft="@+id/button2"-->
+        <!--android:layout_alignStart="@+id/button2" />-->
+
+    <!--<TextView-->
+        <!--android:textSize="55dp"-->
+        <!--android:textStyle="bold"-->
+        <!--android:gravity="center"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="@string/welcome"-->
+        <!--android:paddingTop="@dimen/activity_vertical_margin"-->
+        <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+        <!--android:id="@+id/textView2"-->
+        <!--android:layout_below="@+id/textView"-->
+        <!--android:layout_centerHorizontal="true" />-->
+
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/button2"-->
+        <!--android:hint="@string/guest"-->
+        <!--android:onClick="join_request"-->
+        <!--android:layout_marginTop="18dp"-->
+        <!--android:layout_below="@+id/button"-->
+        <!--android:layout_centerHorizontal="true" />-->
+<!--</RelativeLayout>-->
