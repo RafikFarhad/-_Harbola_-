@@ -5,31 +5,24 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_page4"
-    tools:context="com.project200.teamx.harbola.MainActivity">
-
-    <Button
-        android:hint="@string/host"
-        android:layout_width="wrap_content"
+    android:background="@drawable/main_page5"
+    >
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/button"
-        android:onClick="create_request"
-        android:layout_marginTop="200dp"
-        android:layout_alignStart="@+id/button2"
-        android:textSize="16dp"
-        />
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button2"
-        android:hint="@string/guest"
-        android:onClick="join_request"
-        android:layout_below="@+id/button"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:textSize="16dp"
-        />
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#000066"
+            android:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+    <!--<include layout="@layout/my_toolbar"-->
+        <!--android:id="@+id/include" />-->
+
 
     <TextView
         android:hint="@string/detaills"
@@ -41,6 +34,29 @@
         android:layout_centerHorizontal="true"
         android:id="@+id/textView3"
         />
+
+    <Button
+        android:hint="@string/host"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/button"
+        android:onClick="create_request"
+        android:layout_marginTop="194dp"
+        android:textSize="16dp"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+
+        android:layout_height="wrap_content"
+        android:id="@+id/button2"
+        android:layout_width="100dp"
+        android:hint="@string/guest"
+        android:onClick="join_request"
+        android:layout_marginTop="37dp"
+        android:textSize="16dp"
+        android:layout_below="@+id/button"
+        android:layout_alignLeft="@+id/button"
+        android:layout_alignStart="@+id/button" />
 
     <!--<ImageView-->
         <!--android:layout_width="match_parent"-->
@@ -54,7 +70,7 @@
 
 
 
-<!--:D <?xml version="1.0" encoding="utf-8"?>-->
+<!--<?xml version="1.0" encoding="utf-8"?>-->
 
 <!--<RelativeLayout-->
     <!--xmlns:android="http://schemas.android.com/apk/res/android"-->

@@ -10,5 +10,7 @@
     <string name="refresh">রিফ্রেশ</string>
     <string name="hint">আইপি অ্যাড্রেস</string>
     <string name="primarystatus">Server Final Status</string>
+    <string name="address">আপনার লোকাল অ্যাড্রেস</string>
+
 
 </resources>

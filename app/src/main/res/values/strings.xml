@@ -10,6 +10,7 @@
     <string name="save">Save It!</string>
     <string name="hint">IP Address</string>
 
-    <string name="primarystatus">Server Final Status</string>
+    <string name="address">Your Site Local Address</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>

@@ -60,7 +60,7 @@ import java.util.List;
 
 public class Create_page extends AppCompatActivity {
 
-    private static int Load_Until = 20;
+    private static int Load_Until = 40;
     public final int port = 8080;
 
     private boolean connectedAndReadyToSendFile;
@@ -165,7 +165,8 @@ public class Create_page extends AppCompatActivity {
                     InetAddress inetAddress = enumInetAddress.nextElement();
 
                     if (inetAddress.isSiteLocalAddress()) {
-                        ip += "SiteLocalAddress: "   + inetAddress.getHostAddress() + "\n";
+                        String aa = getResources().getString(R.string.address);
+                        ip += aa + ": "   + inetAddress.getHostAddress() + "\n";
                     }
 
                 }
@@ -254,12 +255,12 @@ public class Create_page extends AppCompatActivity {
 
                 final String sentMsg = "File sent to: " + socket.getInetAddress();
 
-                Create_page.this.runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        Toast.makeText(Create_page.this, sentMsg, Toast.LENGTH_LONG).show();
-                    }});
+//                Create_page.this.runOnUiThread(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        Toast.makeText(Create_page.this, sentMsg, Toast.LENGTH_LONG).show();
+//                    }});
 
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
