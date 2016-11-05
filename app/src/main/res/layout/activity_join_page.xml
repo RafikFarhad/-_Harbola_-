@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:id="@+id/ShowCase"
         android:background="#000000"
-        android:src="@drawable/aux"
+        android:src="@drawable/logo_extended"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="40dp"
         android:layout_marginBottom="45dp"
