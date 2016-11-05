@@ -16,7 +16,7 @@ import android.view.View;
 
 import java.util.Locale;
 
-public class SplashScreen extends AppCompatActivity {
+public class After_SplashScreen extends AppCompatActivity {
      // time to display the splash screen in ms
 
 

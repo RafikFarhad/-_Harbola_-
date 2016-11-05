@@ -1,20 +1,8 @@
 package project200.teamx.harbola;
 
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
 
-                            Intent intent = new Intent(MainActivity.this, SplashScreen.class);
+                            Intent intent = new Intent(MainActivity.this, After_SplashScreen.class);
                             startActivity(intent);
                         }});
                 }
