@@ -209,12 +209,14 @@ public class Join_page extends AppCompatActivity {
 
                 final String eMsg = "Something wrong: " + e.getMessage();
                 System.out.println("EMSG: " + eMsg);
-                Join_page.this.runOnUiThread(new Runnable() {
+               if(e.getMessage()!=null){
+                   Join_page.this.runOnUiThread(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        Toast.makeText(Join_page.this,  eMsg,  Toast.LENGTH_LONG).show();
-                    }});
+                       @Override
+                       public void run() {
+                           Toast.makeText(Join_page.this,  eMsg,  Toast.LENGTH_LONG).show();
+                       }});
+               }
 
             } finally {
                 if(socket != null){
