@@ -63,6 +63,9 @@ public class Join_page extends AppCompatActivity {
     private File downloadTarget;
     private Intent serverServiceIntent;
     private boolean serverThreadActive;
+    Thread timer_to_refresh_click;
+    boolean to_run = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,9 +100,9 @@ public class Join_page extends AppCompatActivity {
             }
         });
         ////
-
-        final Button refresh_button = (Button) findViewById(R.id.refresh);
-        refresh_button.performClick();
+//
+//        final Button refresh_button = (Button) findViewById(R.id.refresh);
+//        refresh_button.performClick();
         final EditText edittext = (EditText) findViewById(R.id.editText);
 
         edittext.setOnKeyListener(new View.OnKeyListener() {
@@ -108,12 +111,27 @@ public class Join_page extends AppCompatActivity {
                 if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
                         (keyCode == KeyEvent.KEYCODE_ENTER)) {
                     edittext.setInputType(InputType.TYPE_NULL);
-                    refresh_button.performClick();
+//                    refresh_button.performClick();
                     return true;
                 }
                 return false;
             }
         });
+
+        timer_to_refresh_click = new Thread(){
+            public void run(){
+                while(to_run){
+                    try{
+                        sleep(2000);
+                        if(to_run) Refresh_Clicked();
+                    } catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        timer_to_refresh_click.setDaemon(true);
+        timer_to_refresh_click.start();
 
     }
     public void save_it(View a) throws IOException{
@@ -138,6 +156,12 @@ public class Join_page extends AppCompatActivity {
         }
         in.close();
         out.close();
+        Join_page.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(Join_page.this, "Saved!", Toast.LENGTH_LONG).show();
+            }});
+
 
     }
     private boolean isNetworkAvailable() {
@@ -209,14 +233,14 @@ public class Join_page extends AppCompatActivity {
 
                 final String eMsg = "Something wrong: " + e.getMessage();
                 System.out.println("EMSG: " + eMsg);
-               if(e.getMessage()!=null){
-                   Join_page.this.runOnUiThread(new Runnable() {
+                if(e.getMessage()!=null){
+                    Join_page.this.runOnUiThread(new Runnable() {
 
-                       @Override
-                       public void run() {
-                           Toast.makeText(Join_page.this,  eMsg,  Toast.LENGTH_LONG).show();
-                       }});
-               }
+                        @Override
+                        public void run() {
+                            Toast.makeText(Join_page.this,  eMsg,  Toast.LENGTH_LONG).show();
+                        }});
+                }
 
             } finally {
                 if(socket != null){
@@ -230,16 +254,27 @@ public class Join_page extends AppCompatActivity {
             }
         }
     }
-    public void Refresh_Clicked(View view){
+    public void Refresh_Clicked(){
 
         //System.out.println("CLiCkED");
+        Join_page.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(to_run) Toast.makeText(Join_page.this, "View Refreshed", Toast.LENGTH_SHORT).show();
+            }});
+
         path = Environment.getExternalStorageDirectory() + "/";
         downloadTarget = new File(path + "test.png");
         EditText ipEditText = (EditText) findViewById(R.id.editText);
         String IP = ipEditText.getText().toString();
         System.out.println("-----IP: " + IP + " " + Patterns.IP_ADDRESS.matcher(IP).matches());
         if(!Patterns.IP_ADDRESS.matcher(IP).matches()){
-            Toast.makeText(Join_page.this,  "Please Enter an IP Address",  Toast.LENGTH_LONG).show();
+            //Toast.makeText(Join_page.this,  "Please Enter an IP Address",  Toast.LENGTH_LONG).show();
+            Join_page.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(to_run) Toast.makeText(Join_page.this, "Please Enter an IP Address", Toast.LENGTH_SHORT).show();
+                }});
         }
         else {
             ipEditText.setEnabled(false);
@@ -275,6 +310,7 @@ public class Join_page extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        to_run = false;
         super.onPause();
         System.out.println("On Pause");
         //stopServer(null);
@@ -283,6 +319,7 @@ public class Join_page extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        to_run = false;
         super.onDestroy();
         System.out.println("On Destroy");
 

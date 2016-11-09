@@ -40,18 +40,7 @@
         android:textAppearance="@android:style/TextAppearance.Small"
         />
 
-    <Button
-        android:text="@string/refresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/refresh"
-        android:onClick="Refresh_Clicked"
-        android:layout_marginRight="28dp"
-        android:layout_marginEnd="28dp"
-        style="@style/MyButton"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+
 
     <Button
         android:text="@string/save"
@@ -67,3 +56,15 @@
         android:layout_alignParentStart="true" />
 
 </RelativeLayout>
+<!--<Button-->
+<!--android:text="@string/refresh"-->
+<!--android:layout_width="wrap_content"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:id="@+id/refresh"-->
+<!--android:onClick="Refresh_Clicked"-->
+<!--android:layout_marginRight="28dp"-->
+<!--android:layout_marginEnd="28dp"-->
+<!--style="@style/MyButton"-->
+<!--android:layout_alignParentBottom="true"-->
+<!--android:layout_alignParentRight="true"-->
+<!--android:layout_alignParentEnd="true" />-->
